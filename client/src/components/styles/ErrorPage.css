@@ -1,0 +1,22 @@
+.error-page {
+    text-align: center;
+    padding: 4rem 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .error-page h1 {
+    font-size: 3rem;
+    color: #dc3545;
+    margin-bottom: 1rem;
+  }
+  
+  .error-page p {
+    color: #666;
+    margin-bottom: 1rem;
+  }
+  
+  .error-page i {
+    color: #999;
+  }
+  

@@ -1,0 +1,39 @@
+.customer-list {
+    padding: 2rem;
+  }
+  
+  .customer-list h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+  
+  .customer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 1rem;
+  }
+  
+  .customer-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .customer-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  
+  .customer-card h3 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .customer-card p {
+    margin: 0.5rem 0;
+    color: #666;
+  }

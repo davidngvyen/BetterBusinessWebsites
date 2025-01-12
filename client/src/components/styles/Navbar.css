@@ -1,0 +1,82 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 10%;
+  min-height: 120px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.navbar .logo {
+  height: 100px;
+  width: 100px;
+}
+
+.navbar h1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 30px;
+  color: black;
+  margin: 0;
+  white-space: nowrap; /* Prevent text from breaking */
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar ul li {
+  margin: 0 1rem;
+}
+
+.navbar ul li a {
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+}
+
+/* Responsive Design for Smaller Screens */
+/* Responsive Design for Smaller Screens */
+@media (max-width: 1250px) {
+  .navbar {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center all items */
+    padding: 1rem; /* Add some padding for better spacing */
+  }
+
+  .navbar .logo {
+    margin-bottom: 1rem; /* Add spacing below the logo */
+  }
+
+  .navbar h1 {
+    position: static; /* Remove absolute positioning */
+    transform: none; /* Remove translation */
+    margin-bottom: 1rem; /* Add spacing below the title */
+    white-space: normal; /* Allow text to wrap if needed */
+    text-align: center; /* Ensure it stays centered */
+  }
+
+  .navbar ul {
+    justify-content: center; /* Center navigation links */
+    flex-direction: column; /* Stack links vertically */
+    margin: 1rem 0; /* Add spacing around the links */
+    width: 100%; /* Ensure links take up the full width */
+    text-align: center; /* Center align the text of links */
+  }
+
+  .navbar ul li {
+    margin: 0.5rem 0; /* Add space between individual links */
+  }
+
+  .navbar ul li a {
+    font-size: 18px; /* Ensure links are legible */
+    line-height: 1.5; /* Add spacing between lines of text */
+    word-break: break-word; /* Prevent long words or URLs from overflowing */
+  }
+}
