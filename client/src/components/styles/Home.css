@@ -1,26 +1,96 @@
 .home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px); /* Subtract navbar height */
   padding: 2rem;
   text-align: center;
+  background: linear-gradient(to bottom right, var(--accent-lightest), var(--background-light));
 }
 
-.home h1 {
+.logo-container {
+  margin-bottom: 2rem;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.better-business-text {
+  font-size: 4rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.home p {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  max-width: 600px;
+  line-height: 1.6;
+  animation: fadeIn 1s ease-out 0.3s both;
 }
 
 .home-links {
   margin-top: 2rem;
+  animation: fadeIn 1s ease-out 0.6s both;
 }
 
 .home-button {
   display: inline-block;
-  padding: 0.8rem 1.5rem;
-  background-color: #007bff;
+  padding: 1rem 2rem;
+  background-color: var(--primary-color);
   color: white;
   text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.3s;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 1.125rem;
+  transition: all var(--transition-speed) ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.1), 0 2px 4px -2px rgba(220, 38, 38, 0.1);
 }
 
 .home-button:hover {
-  background-color: #0056b3;
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(220, 38, 38, 0.15), 0 3px 6px -2px rgba(220, 38, 38, 0.15);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .better-business-text {
+    font-size: 3rem;
+  }
+
+  .home p {
+    font-size: 1.125rem;
+    padding: 0 1rem;
+  }
+
+  .home-button {
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+  }
 }

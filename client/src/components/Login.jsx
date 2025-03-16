@@ -20,6 +20,7 @@ function Login() {
           onClick={handleGoogleLogin} 
           className="google-login-button"
         >
+          <img src={googleIcon} alt="Google" className="google-icon" />
           Sign in with Google
         </button>
       </div>

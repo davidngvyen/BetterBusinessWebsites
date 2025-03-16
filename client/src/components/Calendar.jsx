@@ -11,6 +11,8 @@ import {
   Autocomplete,
   Grid,
   Paper,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { 
     Select, 
@@ -19,6 +21,7 @@ import {
     FormControl, 
     InputLabel 
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './styles/Calendar.css';
@@ -26,10 +29,13 @@ import './styles/Calendar.css';
 const localizer = momentLocalizer(moment);
 
 const Calendar = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [customers, setCustomers] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [appointmentTime, setAppointmentTime] = useState({
     start: null,
@@ -44,10 +50,9 @@ const Calendar = () => {
     style: ''
   });
   const [selectedStartTime, setSelectedStartTime] = useState('');
-    const [selectedEndTime, setSelectedEndTime] = useState('');
-    const [contextMenu, setContextMenu] = useState(null); // Stores the context menu position
-    const [selectedEvent, setSelectedEvent] = useState(null);
-
+  const [selectedEndTime, setSelectedEndTime] = useState('');
+  const [contextMenu, setContextMenu] = useState(null); // Stores the context menu position
+  const [currentView, setCurrentView] = useState('week');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,13 +65,19 @@ const Calendar = () => {
         console.log('Received appointments:', appointmentsRes.data);
         console.log('Received customers:', customersRes.data);
         
-        const calendarEvents = appointmentsRes.data.map(apt => ({
+        const calendarEvents = appointmentsRes.data.map(apt => {
+          const customer = customersRes.data.find(c => c.id === apt.customer_id);
+          return {
             id: apt.id,
             title: `${apt.customer_fname} ${apt.customer_lname}`,
             start: moment(`${apt.date} ${apt.start_time}`, 'YYYY-MM-DD HH:mm:ss').toDate(),
             end: moment(`${apt.date} ${apt.end_time}`, 'YYYY-MM-DD HH:mm:ss').toDate(),
-            customer: apt.customer_id
-          }));
+            customer: apt.customer_id,
+            style: customer?.style,
+            price: customer?.price,
+            notes: apt.notes
+          };
+        });
         setEvents(calendarEvents);
         setCustomers(customersRes.data);
       } catch (error) {
@@ -129,17 +140,30 @@ const Calendar = () => {
     };
   };
 
-  const EventComponent = ({ event }) => (
-    <div
-      style={{ fontSize: '12px', lineHeight: '1.2', cursor: 'context-menu' }}
-      onContextMenu={(e) => handleRightClick(e, event)} // Trigger right-click menu
-    >
-      <strong>{event.title}</strong>
-      <div>Phone: {event.phone}</div>
-      <div>Price: ${event.price}</div>
-      <div>Style: {event.style}</div>
-    </div>
-  );
+  const EventComponent = ({ event }) => {
+    if (currentView === 'month') {
+      return (
+        <div className="event-month-view">
+          <div className="event-month-info">
+            {event.title.split(' ')[0]} - {moment(event.start).format('h:mm A')}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div className="event-customer-info">
+          {event.title}
+        </div>
+        <div className="event-details">
+          <div>Style: {event.style || 'Not specified'}</div>
+          <div>Price: ${event.price || 'N/A'}</div>
+          {event.notes && <div>Notes: {event.notes}</div>}
+        </div>
+      </div>
+    );
+  };
   
 
   const handleSelectSlot = ({ start }) => {
@@ -206,7 +230,19 @@ const Calendar = () => {
         setSelectedStartTime('');
         setSelectedEndTime('');
         setShowNewCustomerForm(false);
+        setNewCustomer({
+          fName: '',
+          lName: '',
+          pNum: '',
+          price: '',
+          style: ''
+        });
     };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    resetForm();
+  };
 
   const handleAddNewCustomer = async () => {
     try {
@@ -231,6 +267,58 @@ const Calendar = () => {
     }
   };
 
+  const handleEventDoubleClick = (event) => {
+    setSelectedEvent(event);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/appointments/${selectedEvent.id}`, {
+        withCredentials: true,
+      });
+      setEvents(events.filter(event => event.id !== selectedEvent.id));
+      setDeleteDialogOpen(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      alert('Failed to delete appointment. Please try again.');
+    }
+  };
+
+  const CustomToolbar = (toolbar) => {
+    return (
+      <div className="rbc-toolbar">
+        <div className="rbc-btn-group">
+          <button onClick={() => toolbar.onNavigate('PREV')}>Back</button>
+          <button onClick={() => toolbar.onNavigate('TODAY')}>Today</button>
+          <button onClick={() => toolbar.onNavigate('NEXT')}>Next</button>
+        </div>
+        <span className="rbc-toolbar-label">{toolbar.label}</span>
+        <div className="rbc-btn-group">
+          <button
+            className={toolbar.view === 'month' ? 'rbc-active' : ''}
+            onClick={() => toolbar.onView('month')}
+          >
+            Month
+          </button>
+          <button
+            className={toolbar.view === 'week' ? 'rbc-active' : ''}
+            onClick={() => toolbar.onView('week')}
+          >
+            Week
+          </button>
+          <button
+            className={toolbar.view === 'day' ? 'rbc-active' : ''}
+            onClick={() => toolbar.onView('day')}
+          >
+            Day
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="calendar-container">
         <BigCalendar
@@ -240,6 +328,8 @@ const Calendar = () => {
             endAccessor="end"
             selectable
             onSelectSlot={handleSelectSlot}
+            onDoubleClickEvent={handleEventDoubleClick}
+            onView={(view) => setCurrentView(view)}
             step={7.5}
             timeslots={4}
             defaultView="week"
@@ -248,7 +338,8 @@ const Calendar = () => {
             max={moment().hours(20).minutes(0).toDate()} // Changed to 8 PM
             eventPropGetter={eventStyleGetter}
             components={{
-                event: EventComponent
+                event: EventComponent,
+                toolbar: CustomToolbar
             }}
             formats={{
                 eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
@@ -270,7 +361,7 @@ const Calendar = () => {
                 <MenuItem onClick={handleDeleteEvent}>Delete Appointment</MenuItem>
             </Menu>
         )}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
             <DialogTitle>
             Schedule Appointment for {moment(selectedDate).format('MMMM D, YYYY')}
             </DialogTitle>
@@ -408,6 +499,7 @@ const Calendar = () => {
                             variant="contained"
                             onClick={handleAddNewCustomer}
                             fullWidth
+                            className="schedule-button"
                         >
                             Add Customer
                         </Button>
@@ -419,17 +511,58 @@ const Calendar = () => {
             </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={handleCloseDialog}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleAddAppointment}
             variant="contained"
             disabled={!selectedCustomer}
+            className="schedule-button"
           >
             Schedule Appointment
           </Button>
         </DialogActions>
       </Dialog>
       
+      {/* Delete Confirmation Dialog */}
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle className="delete-dialog-title">
+          Delete Appointment
+        </DialogTitle>
+        <DialogContent>
+          {selectedEvent && (
+            <div className="delete-dialog-content">
+              <p>Are you sure you want to delete this appointment?</p>
+              <div className="appointment-details">
+                <p><strong>Customer:</strong> {selectedEvent.title}</p>
+                <p><strong>Time:</strong> {moment(selectedEvent.start).format('h:mm A')} - {moment(selectedEvent.end).format('h:mm A')}</p>
+                <p><strong>Date:</strong> {moment(selectedEvent.start).format('MMMM D, YYYY')}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

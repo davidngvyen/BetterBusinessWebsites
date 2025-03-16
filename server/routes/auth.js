@@ -25,8 +25,12 @@ router.get('/user', (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('http://localhost:3000/login');
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error during logout', error: err });
+    }
+    res.redirect('http://localhost:3000/login');
+  });
 });
 
 module.exports = router;

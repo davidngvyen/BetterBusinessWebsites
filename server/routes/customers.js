@@ -46,6 +46,36 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Update customer
+router.put('/:id', async (req, res) => {
+  try {
+    if (!req.user || !req.user.email) {
+      return res.status(401).json({ message: 'Unauthorized access' });
+    }
+
+    const { id } = req.params;
+    const { fname, lname, pnum, price, style } = req.body;
+    const schemaName = getUserSchema(req.user.email);
+
+    const result = await pool.query(
+      `UPDATE ${schemaName}.customers 
+       SET fname = $1, lname = $2, pnum = $3, price = $4, style = $5
+       WHERE id = $6
+       RETURNING *`,
+      [fname, lname, pnum, price, style, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating customer:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // DELETE /api/customers/:id
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
@@ -71,8 +101,5 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-
-
-
 
 module.exports = router;
